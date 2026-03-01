@@ -1,2 +1,34 @@
 # sysadmin-lab
-System administration practice: process monitoring, resource tracking, and OS internals.
+
+A hands‑on practice repository for system administration fundamentals, focusing on Linux and Windows internals, process management, resource monitoring, and OS‑level debugging. This lab accompanies my self‑study in preparation for security and operations roles.
+
+## Purpose
+- Explore core OS concepts: processes, filesystems, permissions, system calls.
+- Practice with essential tools: `htop`, `strace`, `lsof`, `ps`, `kill`, and the Sysinternals Suite.
+- Document daily progress, commands, and observations in the [learning log](docs/LEARNING_LOG.md).
+
+## Repository Structure
+- `src/` – Python scripts and small utilities used during experiments.
+- `docs/` – Learning log and screenshots from lab exercises.
+- `tests/` – (future) Unit tests for any tools developed.
+- `requirements.txt` – Python dependencies (currently only `psutil`).
+
+## Getting Started
+1. Clone the repo:
+```bash
+git clone https://github.com/bcyberly/sysadmin-lab.git
+cd sysadmin-lab
+```
+
+2. (Optional) Create a virtual environment and install dependencies:
+```bash
+python -m venv venv
+source venv/bin/activate   # or venv\Scripts\activate on Windows
+pip install -r requirements.txt
+```
+
+3. Explore the Linux VM as described in the learning log.
+
+## Tools & Environments
+- **Linux VM**: Ubuntu 22.04 LTS (VirtualBox) for process tracing and filesystem exploration.
+- **Sysinternals Suite**: Process Explorer, Process Monitor, and other advanced Windows tools.
