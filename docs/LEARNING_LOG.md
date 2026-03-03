@@ -89,3 +89,37 @@ less ls_strace.txt
 wc -l ls_strace.txt
 strace echo hello
 ```
+---
+## [2026-03-03] – Day 17: Quick strace Filter Exercise
+
+### Concept
+- Using `strace` with the `-e` flag to trace only specific system calls.
+- Counting how many times a particular syscall is invoked.
+
+### Artifact
+- Ran `strace -e write echo "hello" 2>&1 | head -10` to see only `write` syscalls made by `echo`.
+  - Output showed a single `write` call writing `"hello\n"` to file descriptor 1 (stdout).
+
+- Counted the number of `write` syscalls:
+
+```bash
+strace -e write echo "hello" 2>&1 | grep write | wc -l
+```
+
+  Result: **1** (exactly one `write` call).
+
+### Key Observations
+- The `-e write` filter makes `strace` output only the `write` system calls, cutting through the noise of dozens of other syscalls (like memory mapping and library loading).
+- `echo "hello"` results in exactly one `write` to stdout – the string plus newline.
+- Redirecting stderr to stdout (`2>&1`) is necessary to pipe the trace output to `grep` and `wc`.
+
+### Reflection
+- This tiny exercise demonstrates how filtering makes `strace` a precise tool: you can focus on exactly the syscalls you care about (e.g., monitoring file writes or network activity).
+- It reinforces that even trivial commands involve kernel interaction – and that you can measure that interaction quantitatively.
+
+### Commands Used
+```bash
+strace -e write echo "hello" 2>&1 | head -10
+strace -e write echo "hello" 2>&1 | grep write | wc -l
+```
+---
