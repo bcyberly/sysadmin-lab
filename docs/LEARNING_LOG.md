@@ -50,3 +50,42 @@ Expand-Archive -Path .\SysinternalsSuite.zip -DestinationPath C:\Tools\Sysintern
 - This environment is now ready for deeper exploration of processes, system calls, and filesystem internals.
 
 ---
+## [2026-03-02] – Day 16: Quick strace Exploration
+
+### Concept
+- Using `strace` to trace system calls made by a command.
+- Understanding how programs interact with the Linux kernel.
+
+### Artifact
+- Ran `strace -o ls_strace.txt ls -l /tmp` to capture all system calls made by `ls`.
+- Examined the trace with `less`.
+- Counted the number of system calls:  
+
+```bash
+wc -l ls_strace.txt
+```
+
+  Output: **195** lines (each line is one system call).
+
+- Ran `strace echo hello` to see a simpler trace directly in the terminal.
+
+### Key Observations
+- The first system call is always `execve` – it loads the program into memory.
+- `openat`, `read`, `write`, `close` appear frequently – they handle file access and output.
+- `mmap` and `brk` manage memory allocation (e.g., for shared libraries and heap).
+- For `ls`, many calls are related to loading `libc.so.6` and reading directory contents.
+- The actual directory listing is printed via a `write` to file descriptor 1 (stdout).
+- `echo hello` produced a shorter trace, ending with `write(1, "hello\n", 6)`.
+
+### Reflection
+- Even a simple command like `ls` makes nearly **200 system calls**. This shows the complexity hidden behind everyday tools.
+- `strace` is invaluable for debugging, performance analysis, and learning how programs work at the system level.
+- This quick session reinforced the boundary between user space (where our programs run) and kernel space (which provides services via syscalls).
+
+### Commands Used
+```bash
+strace -o ls_strace.txt ls -l /tmp
+less ls_strace.txt
+wc -l ls_strace.txt
+strace echo hello
+```
