@@ -123,3 +123,91 @@ strace -e write echo "hello" 2>&1 | head -10
 strace -e write echo "hello" 2>&1 | grep write | wc -l
 ```
 ---
+## [2026-03-04] – Day 18: `strace` Deep Dive
+
+### Goal
+Use `strace` to observe the system calls of a Python script writing to a file, and understand the interaction between user space and the kernel.
+
+### Tasks Completed
+- Created a Python script that writes ten lines to `/tmp/test.log`, with a 1-second delay between writes.
+- Attempted to attach `strace` to a background process – encountered `Operation not permitted` due to kernel security restrictions.
+- Successfully ran `strace` directly on the script to capture all `write` system calls.
+- Examined the output, counted the `write` calls, and verified the file content.
+- Used a full strace trace to locate the `openat` call that created the log file.
+- Captured a screenshot of the `strace` output for documentation.
+
+### Commands Used
+
+```bash
+# Create the script (indentation corrected with nano)
+nano /tmp/writer.py
+```
+
+```python
+import time
+with open("/tmp/test.log", "w") as f:
+    for i in range(10):
+        f.write(f"Line {i}\n")
+        f.flush()
+        time.sleep(1)
+```
+
+```bash
+# Run strace directly (no background attach issues)
+strace -e write -o strace_output.txt python3 /tmp/writer.py
+
+# View the captured write calls
+less strace_output.txt
+
+# Count how many write calls occurred
+grep -c write strace_output.txt
+
+# Verify the file content
+cat /tmp/test.log
+
+# Full trace to see the open call (optional)
+strace -o full_strace.txt python3 /tmp/writer.py
+grep open full_strace.txt
+```
+
+### Observations
+- The `strace_output.txt` contained exactly 10 lines of the form:
+
+```text
+write(3, "Line 0\n", 7) = 7
+write(3, "Line 1\n", 7) = 7
+...
+write(3, "Line 9\n", 7) = 7
++++ exited with 0 +++
+```
+
+- File descriptor `3` was used for all writes. The full trace showed the file being opened:
+
+```text
+openat(AT_FDCWD, "/tmp/test.log", O_WRONLY|O_CREAT|O_TRUNC|O_CLOEXEC, 0666) = 3
+```
+
+  confirming that descriptor 3 pointed to `/tmp/test.log`.
+
+- Each write transferred exactly 7 bytes (`"Line X\n"`) and the kernel returned 7, indicating all bytes were written successfully.
+- The script ran for about 10 seconds because of the `sleep(1)` inside the loop; `strace` captured each call as it happened.
+- The final file content matched the written lines:
+
+```text
+Line 0
+Line 1
+...
+Line 9
+```
+
+### Screenshot
+Below is a screenshot of the `strace` output as viewed with `less`:
+
+![strace output](images/strace_output.png)
+
+### Reflection
+This lab made the boundary between a program and the operating system visible. Every simple file write translates directly into a `write` system call, and the kernel returns the number of bytes actually written. Understanding this is crucial for debugging performance (e.g., too many small writes can slow down an application) and for building mental models of how programs interact with the OS.
+
+The failed attempts to attach to a background process also taught me about Linux security restrictions (`ptrace` scoping) – a useful lesson in itself.
+
+---
