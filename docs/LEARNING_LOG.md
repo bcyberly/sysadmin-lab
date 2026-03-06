@@ -211,3 +211,92 @@ This lab made the boundary between a program and the operating system visible. E
 The failed attempts to attach to a background process also taught me about Linux security restrictions (`ptrace` scoping) – a useful lesson in itself.
 
 ---
+## [2026-03-05] – Day 19: PowerShell Scripting & Windows Internals
+
+### Concepts Mastered
+- **PowerShell fundamentals:** Cmdlets, object pipeline, parameterized scripts.
+- **Windows process introspection:** `Get-Process`, sorting and filtering objects directly.
+- **Registry as a filesystem drive:** Accessing `HKLM:` and `HKCU:` Run keys.
+- **Building reusable administration tools:** Using `param` blocks for flexible scripts.
+- **Error handling in registry queries:** `-ErrorAction SilentlyContinue` for missing keys.
+
+### Artifacts Updated/Created
+- Created `src/scripts/ps_process_report.ps1` – exports all running processes to CSV, displays top 5 by CPU and memory, and accepts an optional output path.
+- Created `src/scripts/ps_startup.ps1` – queries both HKLM and HKCU Run keys, combines the results, exports to CSV, and prints them to the console.
+
+### Testing – Happy Path
+Ran both scripts with default parameters to verify functionality:
+
+```powershell
+.\src\scripts\ps_process_report.ps1
+```
+
+Expected console output (sample):
+
+```
+Total processes: 123
+Top 5 by CPU:
+Name         CPU
+----         ---
+ProcessA     45.2
+ProcessB     32.1
+...
+Top 5 by memory (WorkingSet):
+Name         WorkingSet
+----         ----------
+ProcessC     12345678
+...
+```
+
+CSV file `process_report.csv` generated successfully.
+
+```powershell
+.\src\scripts\ps_startup.ps1
+```
+
+Expected console output (sample):
+
+```
+Key        Name             Value
+---        ----             -----
+HKLM:Run   SecurityHealth   "C:\Program Files\Windows Defender\..."
+HKCU:Run   OneDrive         "C:\Users\user\AppData\Local\Microsoft\..."
+...
+```
+
+CSV file `startup_programs.csv` generated successfully.
+
+### Testing – Edge Cases (Chaos Monkey)
+
+Intentionally tested script robustness:
+
+- **Missing registry keys:**  
+
+```powershell
+# Simulate missing key by temporarily renaming it, or run on a clean VM
+.\src\scripts\ps_startup.ps1
+```
+
+→ Script runs without error, exports empty CSV (thanks to `-ErrorAction SilentlyContinue`).
+
+- **Invalid output path:**  
+
+```powershell
+.\src\scripts\ps_process_report.ps1 -Path "Z:\nonexistent\report.csv"
+```
+
+→ Error: `Export-Csv : Could not find a part of the path` – acceptable, as the user should provide a valid path. (Future improvement: add directory creation/validation.)
+
+- **No arguments:** Both scripts default to sensible filenames in the current directory, so they never fail due to missing parameters.
+
+### Reflection
+Crossing into Windows scripting felt like learning a new language, but the object‑oriented pipeline is a revelation. Sorting processes by CPU directly on the `CPU` property is far cleaner than parsing text columns in bash. The registry scripts give a practical autoruns tool – directly applicable to security investigations. Learned to handle missing registry keys with `-ErrorAction SilentlyContinue`, making scripts robust. Using the `param` block makes them reusable, and CSV export turns raw data into shareable intelligence. 
+
+### Evidence
+**Commits:**
+
+``` 
+feat: add PowerShell script to report processes (ps_process_report)
+feat: add PowerShell script to list startup programs from registry
+```
+---
