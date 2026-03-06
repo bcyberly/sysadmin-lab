@@ -32,3 +32,18 @@ pip install -r requirements.txt
 ## Tools & Environments
 - **Linux VM**: Ubuntu 22.04 LTS (VirtualBox) for process tracing and filesystem exploration.
 - **Sysinternals Suite**: Process Explorer, Process Monitor, and other advanced Windows tools.
+
+## PowerShell Scripts
+
+Located in `src/scripts/`, these scripts help inspect and manage Windows systems.
+
+| Script | Description |
+|--------|-------------|
+| `ps_process_report.ps1` | Exports all running processes to CSV and prints top CPU/memory processes. |
+| `ps_startup.ps1` | Lists startup programs from HKLM and HKCU Run keys, exports to CSV. |
+
+**Usage examples:**
+```powershell
+.\src\scripts\ps_process_report.ps1 -Path "my_report.csv"
+.\src\scripts\ps_startup.ps1 -Path "startup.csv"
+```
