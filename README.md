@@ -33,17 +33,31 @@ pip install -r requirements.txt
 - **Linux VM**: Ubuntu 22.04 LTS (VirtualBox) for process tracing and filesystem exploration.
 - **Sysinternals Suite**: Process Explorer, Process Monitor, and other advanced Windows tools.
 
-## PowerShell Scripts
+---
+## Scripts
 
-Located in `src/scripts/`, these scripts help inspect and manage Windows systems.
+Located in `src/scripts/`:
 
-| Script | Description |
-|--------|-------------|
-| `ps_process_report.ps1` | Exports all running processes to CSV and prints top CPU/memory processes. |
-| `ps_startup.ps1` | Lists startup programs from HKLM and HKCU Run keys, exports to CSV. |
+| Script | Purpose | Example Usage |
+|--------|---------|---------------|
+| `ps_process_report.ps1` | Exports all running processes to CSV and prints the top 5 by CPU and memory usage. | ```.\src\scripts\ps_process_report.ps1 -Path "report.csv"``` |
+| `ps_startup.ps1` | Queries both HKLM and HKCU Run keys for startup programs, exports to CSV, and displays them. | ```.\src\scripts\ps_startup.ps1 -Path "startup.csv"``` |
+| `inotify_logger.sh` | Monitors a directory (default `/tmp/test_monitor`) for file events (create, modify, delete, move) and logs them with timestamps. | ```sudo ./src/scripts/inotify_logger.sh /path/to/watch``` |
+
+**Dependencies:**
+- PowerShell scripts require **PowerShell** (built into Windows).  
+- `inotify_logger.sh` requires **inotify-tools** (install via ```bash sudo apt install inotify-tools -y ``` on Linux).  
 
 **Usage examples:**
+
+- **PowerShell:**
 ```powershell
 .\src\scripts\ps_process_report.ps1 -Path "my_report.csv"
 .\src\scripts\ps_startup.ps1 -Path "startup.csv"
 ```
+
+- **Bash (Linux):**
+```bash
+sudo ./src/scripts/inotify_logger.sh /tmp/watch_dir
+```
+---

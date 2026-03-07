@@ -300,3 +300,48 @@ feat: add PowerShell script to report processes (ps_process_report)
 feat: add PowerShell script to list startup programs from registry
 ```
 ---
+## [2026-03-06] – Day 20: Linux Filesystem Monitoring with inotify
+
+### Concepts Mastered
+- **inotify:** Linux kernel subsystem for monitoring filesystem events in real time.
+- **Event types:** `CREATE`, `MODIFY`, `DELETE`, `MOVED_FROM`, `MOVED_TO`.
+- **inotifywait:** Command‑line tool to wait for events and act on them.
+- **Permissions:** Understanding how file ownership affects access (solved with `sudo chown`).
+
+### Artifact
+- Created `src/scripts/inotify_logger.sh` – a bash script that monitors a directory and logs all file events with timestamps.
+
+### Commands Used
+
+```bash
+# Install inotify-tools
+sudo apt update && sudo apt install inotify-tools -y
+
+# Run the monitor (first terminal)
+sudo src/scripts/inotify_logger.sh /tmp/test_monitor
+
+# In a second terminal, generate test events
+touch /tmp/test_monitor/file1
+echo "hello" > /tmp/test_monitor/file1
+mv /tmp/test_monitor/file1 /tmp/test_monitor/file2
+rm /tmp/test_monitor/file2
+```
+
+### Sample Log Output
+
+```
+2026-03-06 21:08:52 /tmp/test_monitor/file1 CREATE
+2026-03-06 21:14:51 /tmp/test_monitor/file1 MODIFY
+2026-03-06 21:22:56 /tmp/test_monitor/file2 CREATE
+2026-03-06 21:25:27 /tmp/test_monitor/file1 MOVED_FROM
+2026-03-06 21:25:27 /tmp/test_monitor/file2 MOVED_TO
+2026-03-06 21:25:41 /tmp/test_monitor/file2 DELETE
+```
+
+### Reflection
+`inotify` provides real‑time insight into filesystem activity – invaluable for security (file integrity monitoring), automation (triggering backups on file change), and debugging. The script taught me to handle absolute paths, manage permissions (using `sudo chown` to avoid repeated `sudo`), and use `inotifywait` effectively. This complements my earlier `strace` work: both reveal how programs interact with the OS, but `inotify` is event-driven and persistent.
+
+### Evidence
+- **Commit (script):** `feat: add inotify filesystem monitoring script`
+
+---
