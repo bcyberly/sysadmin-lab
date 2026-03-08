@@ -345,3 +345,46 @@ rm /tmp/test_monitor/file2
 - **Commit (script):** `feat: add inotify filesystem monitoring script`
 
 ---
+
+## [2026-03-08] – Day 21: Quick System Stats with vmstat & iostat
+
+### Concepts Mastered
+- **vmstat:** Reports virtual memory statistics, including processes, memory, paging, block I/O, traps, and CPU activity.
+- **iostat:** Monitors system input/output device load by observing the time devices are active and their transfer rates.
+- **Key metrics:** `r` (runnable processes), `free` (free memory), `si/so` (swap in/out), `us/sy` (user/system CPU), `wa` (I/O wait), `%util` (disk utilization), `await` (average I/O response time).
+
+### Artifact
+- No new script – this was a hands-on exploration of built-in Linux performance tools.
+- Captured real-time output from `vmstat` and `iostat` to understand system behaviour.
+
+### Commands Used
+```bash
+# Show system statistics every 2 seconds (stop with Ctrl+C)
+vmstat 2
+
+# Show extended disk statistics every 1 second
+iostat -x 1
+```
+
+### Sample Log Output
+```
+$ vmstat 2
+procs -----------memory---------- ---swap-- -----io---- -system-- -------cpu-------
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st
+ 1  0      4 141212  24140 1053280    0    0 25203   641 1888   45 14 32 53  1  0
+ 0  0      4 158264  24156 1053224    0    0     0    92 1265  420  1  1 99  0  0
+```
+
+```
+$ iostat -x 1
+avg-cpu:  %user   %nice %system %iowait  %steal   %idle
+           6.81    0.55   17.42    0.79    0.00   74.44
+
+Device            r/s     rkB/s   rrqm/s  %rrqm r_await rareq-sz     w/s     wkB/s   wrqm/s  %wrqm w_await wareq-sz     %util
+sda            142.45  14275.64    57.21  28.65    0.64   100.21   12.66    395.13    48.93  79.45    1.10    31.22    8.43
+```
+
+### Reflection
+Running `vmstat` and `iostat` gave me a quick, real-time view of system health. I saw that CPU usage was mostly idle (`id` around 90-99%), memory was plentiful (`free` in the hundreds of MB), and disk I/O was low (`%util` under 10%). The `wa` (I/O wait) column in `vmstat` stayed near zero, confirming no disk bottleneck. These tools are invaluable for spotting performance issues at a glance – high `r` could mean CPU overload, high `si/so` indicates swapping (low memory), and high `%util` suggests a disk bottleneck. This mini-lab adds two more commands to my sysadmin toolkit, complementing `htop`, `strace`, and `inotify`.
+
+---
