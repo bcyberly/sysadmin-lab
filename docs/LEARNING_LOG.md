@@ -388,3 +388,52 @@ sda            142.45  14275.64    57.21  28.65    0.64   100.21   12.66    395.
 Running `vmstat` and `iostat` gave me a quick, real-time view of system health. I saw that CPU usage was mostly idle (`id` around 90-99%), memory was plentiful (`free` in the hundreds of MB), and disk I/O was low (`%util` under 10%). The `wa` (I/O wait) column in `vmstat` stayed near zero, confirming no disk bottleneck. These tools are invaluable for spotting performance issues at a glance – high `r` could mean CPU overload, high `si/so` indicates swapping (low memory), and high `%util` suggests a disk bottleneck. This mini-lab adds two more commands to my sysadmin toolkit, complementing `htop`, `strace`, and `inotify`.
 
 ---
+
+---
+## [2026-03-09] – Day 22: auditd Introduction
+
+### Concept
+- **auditd:** Linux audit daemon that logs security-relevant events (file accesses, system calls, etc.) for monitoring and compliance.
+- **Audit rules:** Can be added with `auditctl` to watch files/directories for specific permissions (`r` = read, `w` = write, `a` = attribute change, `x` = execute).
+- **ausearch:** Tool to query audit logs based on a key, time, or other criteria.
+
+### Artifact
+- Installed `auditd` and `audispd-plugins`.
+- Added a rule to monitor `/etc/passwd` for write and attribute changes (`-p wa`).
+- Added a test rule on `/tmp/testfile` and generated a write event with `tee`.
+- Verified the rule was active and searched the logs with `ausearch`.
+
+### Commands Used
+```bash
+# Install auditd and plugins
+sudo apt update && sudo apt install auditd audispd-plugins -y
+
+# Enable and start the service
+sudo systemctl enable auditd && sudo systemctl start auditd
+
+# Add a rule to watch /etc/passwd for write/attribute changes
+sudo auditctl -w /etc/passwd -p wa -k passwd_monitor
+
+# Verify active rules
+sudo auditctl -l
+
+# Add a test rule on a temporary file
+sudo auditctl -w /tmp/testfile -p wa -k test
+
+# Generate an event
+echo "hello" | sudo tee /tmp/testfile
+
+# Search the audit log for events with key "test"
+sudo ausearch -k test
+```
+
+### Observations
+- The rule on `/etc/passwd` was added successfully (visible with `auditctl -l`).
+- Writing to `/tmp/testfile` via `tee` generated an audit event, which `ausearch` displayed.
+- The audit log shows detailed information: timestamp, process name (`tee`), user ID (`auid=1000`), success status, file path, and the rule key.
+- The event includes the system call number, arguments, and path information – invaluable for forensics.
+
+### Reflection
+`auditd` is a powerful tool for security monitoring. Unlike `inotify` (which is per-process), `auditd` works system-wide and logs events with rich metadata. This makes it ideal for compliance (e.g., monitoring access to sensitive files) and intrusion detection. I now understand how to create rules and query the logs. Next steps: explore `audit.rules` for persistent rules, monitor critical system files, and integrate with log analysis tools.
+
+---
