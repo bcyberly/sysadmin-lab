@@ -389,7 +389,6 @@ Running `vmstat` and `iostat` gave me a quick, real-time view of system health. 
 
 ---
 
----
 ## [2026-03-09] – Day 22: auditd Introduction
 
 ### Concept
@@ -435,5 +434,48 @@ sudo ausearch -k test
 
 ### Reflection
 `auditd` is a powerful tool for security monitoring. Unlike `inotify` (which is per-process), `auditd` works system-wide and logs events with rich metadata. This makes it ideal for compliance (e.g., monitoring access to sensitive files) and intrusion detection. I now understand how to create rules and query the logs. Next steps: explore `audit.rules` for persistent rules, monitor critical system files, and integrate with log analysis tools.
+
+---
+
+## [2026-03-15] – Day 23: Extending inotify – Action on CREATE
+
+### Goal
+Enhance the existing `inotify_logger.sh` script to trigger a custom action (a message) whenever a file is created in the monitored directory, turning a passive logger into an active responder.
+
+### Task Completed
+- Modified the `while read event` loop in `inotify_logger.sh` to check for `CREATE` events.
+- When a `CREATE` is detected, an extra line is printed to both console and log file.
+- Tested by creating a file in `/tmp/test_monitor` and verified the extra message appeared.
+- Documented the change in this log.
+
+### Testing Output
+```
+2026-03-15 22:21:44 /tmp/test_monitor/testfile.txt CREATE
+  → A new file was created! (You could run a backup here.)
+```
+
+### Troubleshooting & Lessons Learned
+During the lab, I ran into three common Linux pitfalls and resolved them:
+
+1. **Error: "Text file busy" (VirtualBox Shared Folder Quirks)**
+   - **What happened:** When trying to save the script using a graphical text editor directly inside the `/media/sf_sysadmin-lab/...` shared folder, it failed to save.
+   - **Why it happened:** VirtualBox shared folders (`vboxsf`) have strict file locking and permission rules. Graphical editors often try to create hidden temporary backup files when saving, which the shared folder blocks.
+   - **The Fix:** Copied the script to my local home directory (`cp ... ~/inotify_logger.sh`), edited it there using the terminal-based `nano` editor, and then copied it back with `sudo cp`.
+
+2. **Error: "command not found" (Execution Path)**
+   - **What happened:** Attempted to run `sudo ./inotify_logger.sh` but the terminal threw a "command not found" error.
+   - **Why it happened:** The `./` prefix tells Linux to look for the script in the *current working directory*. I was in my home directory (`~`), but the script was in the shared folder.
+   - **The Fix:** Navigated to the exact directory where the script lived using `cd /media/sf_sysadmin-lab/src/scripts/` before executing it.
+
+3. **Error: "No such file or directory" (The Typo)**
+   - **What happened:** When copying the file, the terminal couldn't find the source path.
+   - **Why it happened:** A simple typo in the directory name: I typed `sf_syadmin-lab` instead of `sf_sysadmin-lab` (missing the first 's'). Linux is case‑sensitive and literal.
+   - **The Fix:** Double‑checked the spelling and corrected the path in the `cp` command.
+
+### Reflection
+This small enhancement demonstrates how a basic monitoring script can be extended to perform actions based on events. The same pattern can be used to trigger backups, send alerts, or start automated workflows. The troubleshooting session reinforced the importance of understanding path resolution, permissions, and the quirks of shared folders.
+
+### Evidence
+- **Commit (script):** `feat: inotify logger triggers action on CREATE`
 
 ---
