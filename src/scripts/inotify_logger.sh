@@ -16,6 +16,9 @@ echo "Started at $(date)" >> "$LOG_FILE"
 inotifywait -m "$WATCH_DIR" -e create -e modify -e delete -e move \
     --format '%T %w%f %e' --timefmt '%Y-%m-%d %H:%M:%S' | while read event
     do
-        echo "$event" >> "LOG_FILE"
-        echo "$event" # also show on console
-    done
+    	echo "$event" | tee -a "$LOG_FILE"
+    	# If the event is a CREATE, do something extra
+    	if echo "$event" | grep -q "CREATE"; then
+    		echo " -> A new file was created! You could run a backup here." | tee -a "$LOG_FILE"
+	fi
+done
