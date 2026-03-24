@@ -479,3 +479,75 @@ This small enhancement demonstrates how a basic monitoring script can be extende
 - **Commit (script):** `feat: inotify logger triggers action on CREATE`
 
 ---
+## [2026-03-24] – Day 24: System Inventory Tool – Phase 1
+
+### Goal
+Create a Python script that gathers basic system information (hostname, OS, CPU, memory) using the `psutil` library, laying the foundation for a cross-platform diagnostic tool.
+
+---
+
+### Task Completed
+
+- Created `src/system_inventory.py` with functions:
+  - `get_system_info()` – returns a dict of hostname, OS, architecture, CPU count, memory stats, boot time.
+  - `bytes_to_human()` – converts bytes to human-readable MB/GB.
+  - `main()` – prints a formatted report.
+- Used `platform` module for hostname, OS, architecture.
+- Used `psutil` for CPU count, memory, and boot time.
+- Installed `psutil` with `pip3 install --user psutil` (system-wide install also possible).
+- Tested on Linux VM; output matches expectations.
+- Noted cross-platform intent (script works on Windows with same code).
+
+---
+
+### Commands Used
+
+```
+# Install psutil (if missing)
+pip3 install --user psutil
+
+# Make script executable
+chmod +x src/system_inventory.py
+
+# Run the script
+python3 src/system_inventory.py
+```
+
+---
+
+### Sample Output
+
+```
+============================================================
+SYSTEM INVENTORY REPORT
+============================================================
+Hostname          : user-VirtualBox
+OS                : Linux 6.8.0-31-generic
+Architecture      : x86_64
+CPU cores (phys)  : 2
+CPU cores (logical): 2
+Memory total      : 3.85 GB
+Memory available  : 2.14 GB
+Memory used       : 1.71 GB
+Memory percent    : 44.5%
+Boot time         : 2026-03-24 10:15:42
+============================================================
+```
+
+---
+
+### Reflection
+
+This script is the first step toward a comprehensive inventory tool. The `psutil` library makes it straightforward to retrieve low-level system data, and the `platform` module provides consistent cross-platform identifiers.
+
+Next phases can include:
+- Disk usage
+- Network interfaces
+- Exporting to JSON/CSV
+
+The code is clean, reusable, and human-readable.
+
+### Evidence
+
+- **Commit:** `feat: system inventory tool – basic info`
+---

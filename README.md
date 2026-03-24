@@ -60,4 +60,15 @@ Located in `src/scripts/`:
 ```bash
 sudo ./src/scripts/inotify_logger.sh /tmp/watch_dir
 ```
+
+## Python Tools
+
+Located in `src/` (Python scripts that can be run directly or imported as modules):
+
+| Script | Purpose | Example Usage |
+|--------|---------|---------------|
+| `system_inventory.py` | Gathers system information (hostname, OS, CPU, memory) using `psutil`. | `python src/system_inventory.py` |
+
+**Dependencies:**
+- `psutil` – install with `pip install psutil` (or `pip3 install --user psutil`).
 ---
